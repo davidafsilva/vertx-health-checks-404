@@ -9,16 +9,16 @@ through a couple of endpoints.
 
 ## The Symptom
 
-When issuing a request that is going to be handled by the `H` where `H` 
-is the handler implemented by `HealthCheckHandlerImpl`, depending on how 
-the routing is mounted, the responses that clients get will always be `404`.
+When a request that was targetting an handler `H` - where `H` is the handler 
+implemented by `HealthCheckHandlerImpl` - were issued, depending on how 
+the routing was mounted, clients would either get a `404` or a correct response.
 
 ### The Problematic Setup
 
 The setup that enables a consistent replication of the issue is detailed
-in this repository. In particular, mounting the API that contains an endpoint
-associated with the health check handler mounted as a sub-router in a root 
-path (`/`) as exemplified below.
+in this repository. In particular, mounting the router that contains an 
+endpoint associated with the health check handler mounted as a sub-router in a 
+root path (`/`), as exemplified below.
 
 ```kotlin
 val healthChecker = HealthCheckHandler.create(vertx)
@@ -30,7 +30,7 @@ apiRouter.get("/health").handler(healthChecker)
 
 val rootRouter = Router.router(vertx)
     // more sub-routers here...
-    // e.g. .mountSubRouter("/admin", adminRouter)
+    .mountSubRouter("/nonroot", apiRouter) // just for demonstration
     // redirect everything else to the API router
     .mountSubRouter("/", apiRouter)
 ```
@@ -41,8 +41,8 @@ The cause of the issue, **with the above setup**, seems to be the way that
 sub-routers are handled within [HealthCheckHandlerImpl](https://github.com/vert-x3/vertx-health-check/blob/2b33c1d2ec7ed5bf48e2aa19d551ae02d72d0a5e/src/main/java/io/vertx/ext/healthchecks/impl/HealthCheckHandlerImpl.java#L68-L79).
 <img src="https://i.imgur.com/tFRoSj6.png">
 
-Assuming a request to `http://localhost/health`, those 4 variables defined
-initially between L62-L64 will be assigned with:
+Assuming a request to `/health`, those 4 variables defined between 
+L62-L64 will be assigned with:
 ```java
 String path = "/health"
 String mount = "/"
@@ -60,7 +60,7 @@ and not `/health`, `id` will be set to `health`:
 id = "health"
 ```
 
-`id` will now be handed over to actual [health check implementation](https://github.com/vert-x3/vertx-health-check/blob/2b33c1d2ec7ed5bf48e2aa19d551ae02d72d0a5e/src/main/java/io/vertx/ext/healthchecks/impl/HealthChecksImpl.java#L95-L127)
+`id` will then be handed over to actual [health check implementation](https://github.com/vert-x3/vertx-health-check/blob/2b33c1d2ec7ed5bf48e2aa19d551ae02d72d0a5e/src/main/java/io/vertx/ext/healthchecks/impl/HealthChecksImpl.java#L95-L127)
 as the name of the check for which we're retrieving the status (vs all of them):
 <img src="https://i.imgur.com/EchgkAY.png" />
 
@@ -71,7 +71,7 @@ String[] segments = {"health"}
 ```
 
 On L72, we will try to lookup the check (segment) within the (root) check 
-registry which can result in two possible outcomes<sup>1</sup>:
+registry, which can lead to two possible outcomes<sup>1</sup>:
 1. `null`: there are no checks registered with the `health` name
 2. `!= null`: there is a check registered with the `health` name
 
