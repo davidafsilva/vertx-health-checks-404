@@ -28,7 +28,7 @@ sealed class HealthReporterVerticle : AbstractVerticle() {
     private fun startHttpServer(startPromise: Promise<Void>, apiRouter: Router) {
         val rootRouter = Router.router(vertx)
             // more sub-routers here...
-            .mountSubRouter("/${javaClass.simpleName}", apiRouter) // just for testing and problem demonstration
+            .mountSubRouter("/notroot", apiRouter) // just for testing and problem demonstration
             // redirect everything else to the API router
             .mountSubRouter("/", apiRouter)
 
