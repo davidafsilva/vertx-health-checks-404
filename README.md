@@ -7,6 +7,12 @@ private project.
 The project relies on `vertx-health-checks` to provide statuses reports
 through a couple of endpoints.
 
+> :warning:
+> The issue is not applicable to the most recent `4.x` version, in particular
+> `4.3.1`.  
+> Please refer to the [vertx-4.3.](https://github.com/davidafsilva/vertx-health-checks-404/tree/vertx-4.3.1)
+> branch if you want to run the exact setup on that version.
+
 ## The Symptom
 
 When a request that was targetting an handler `H` - where `H` is the handler 
