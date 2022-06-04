@@ -13,10 +13,10 @@ repositories {
 }
 
 dependencies {
-    val vertxVersion = "3.9.13"
+    val vertxVersion = "4.3.1"
     implementation("io.vertx:vertx-core:$vertxVersion")
     implementation( "io.vertx:vertx-web:$vertxVersion")
-    implementation( "io.vertx:vertx-web-api-contract:$vertxVersion")
+    implementation( "io.vertx:vertx-web-openapi:$vertxVersion")
     implementation( "io.vertx:vertx-health-check:$vertxVersion")
 
     testImplementation(kotlin("test"))

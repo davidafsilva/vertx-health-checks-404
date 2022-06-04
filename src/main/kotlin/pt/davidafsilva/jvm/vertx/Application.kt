@@ -5,10 +5,11 @@ import io.vertx.core.CompositeFuture.all
 import io.vertx.core.Future
 import io.vertx.core.Future.future
 import io.vertx.core.Vertx
-import io.vertx.core.logging.LoggerFactory
+import java.lang.System.Logger.Level.ERROR
+import java.lang.System.Logger.Level.INFO
 
 object Application {
-    private val logger = LoggerFactory.getLogger(Application::class.java)
+    private val logger = System.getLogger(Application::class.java.canonicalName)
 
     fun start() {
         val vertx = Vertx.vertx()
@@ -16,9 +17,9 @@ object Application {
             vertx.deploy(SimpleHealthReporterVerticle()),
             vertx.deploy(OpenApiHealthReporterVerticle()),
         ).onSuccess {
-            logger.info("application successfully started")
+            logger.log(INFO, "application successfully started")
         }.onFailure { e ->
-            logger.error("failed to start application", e)
+            logger.log(ERROR, "failed to start application", e)
         }
     }
 
